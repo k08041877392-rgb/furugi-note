@@ -1,0 +1,44 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import AuthorBox from '../../components/AuthorBox.astro';
+import { SITE } from '../../config';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await post.render();
+
+const articleMeta = {
+  title: post.data.title,
+  description: post.data.description,
+  pubDate: post.data.pubDate,
+  slug: post.slug
+};
+---
+
+<Layout title={post.data.title} description={post.data.description} type="Article" article={articleMeta}>
+  <article>
+    <h1 class="article-title">{post.data.title}</h1>
+    <div class="article-meta">
+      <span>公開日: {post.data.pubDate.toLocaleDateString('ja-JP')}</span>
+      <span style="margin: 0 0.5rem;">|</span>
+      <span>カテゴリー: <a href={`/category/${post.data.category}/`}>{post.data.category}</a></span>
+      <span style="margin: 0 0.5rem;">|</span>
+      <span>この記事を書いた人: <strong>{SITE.author.name}</strong></span>
+    </div>
+    
+    <div class="article-content">
+      <Content />
+    </div>
+
+    <hr style="margin: 3rem 0 1rem 0; border: none; border-top: 1px solid var(--color-border);" />
+    <AuthorBox />
+  </article>
+</Layout>

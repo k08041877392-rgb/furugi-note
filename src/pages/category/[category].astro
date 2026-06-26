@@ -1,0 +1,43 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('posts');
+  const categories = [...new Set(posts.map(post => post.data.category))];
+  
+  return categories.map(category => {
+    const filteredPosts = posts.filter(post => post.data.category === category);
+    filteredPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+    return {
+      params: { category },
+      props: { posts: filteredPosts },
+    };
+  });
+}
+
+const { category } = Astro.params;
+const { posts } = Astro.props;
+---
+
+<Layout title={`カテゴリー: ${category}`}>
+  <h1 style="margin-bottom: 2rem; border-bottom: 2px solid var(--color-primary); padding-bottom: 0.5rem;">
+    カテゴリー: {category}
+  </h1>
+
+  <div class="post-list">
+    {posts.map(post => (
+      <article class="post-card">
+        <div class="post-card__meta">
+          <span>{post.data.pubDate.toLocaleDateString('ja-JP')}</span>
+          <span style="margin: 0 0.5rem;">|</span>
+          <a href={`/category/${post.data.category}/`}>{post.data.category}</a>
+        </div>
+        <h3 class="post-card__title">
+          <a href={`/posts/${post.slug}/`}>{post.data.title}</a>
+        </h3>
+        <p class="post-card__description">{post.data.description}</p>
+      </article>
+    ))}
+  </div>
+</Layout>

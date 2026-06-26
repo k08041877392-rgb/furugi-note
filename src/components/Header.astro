@@ -1,0 +1,20 @@
+---
+import { getCollection } from 'astro:content';
+import { SITE } from '../config';
+
+const posts = await getCollection('posts');
+const categories = [...new Set(posts.map(post => post.data.category))];
+---
+<header class="site-header">
+  <div class="site-header__container">
+    <div class="site-title"><a href="/">{SITE.title}</a></div>
+    <nav class="site-nav">
+      <ul class="nav-list">
+        {categories.map(cat => (
+          <li><a href={`/category/${cat}/`}>{cat}</a></li>
+        ))}
+        <li><a href="/about/">プロフィール</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>

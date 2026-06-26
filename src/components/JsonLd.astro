@@ -1,0 +1,64 @@
+---
+import { SITE } from '../config';
+
+interface Props {
+  type?: 'WebSite' | 'Article' | 'AboutPage';
+  article?: {
+    title: string;
+    description: string;
+    pubDate: Date;
+    slug: string;
+  };
+}
+
+const { type = 'WebSite', article } = Astro.props;
+
+const personId = `${SITE.url}/#author`;
+const websiteId = `${SITE.url}/#website`;
+
+const personSchema = {
+  "@type": "Person",
+  "@id": personId,
+  "name": SITE.author.name,
+  "jobTitle": SITE.author.jobTitle,
+  "description": SITE.author.description,
+  "url": SITE.author.aboutUrl
+};
+
+const websiteSchema = {
+  "@type": "WebSite",
+  "@id": websiteId,
+  "url": `${SITE.url}/`,
+  "name": SITE.title,
+  "description": SITE.description,
+  "publisher": {
+    "@type": "Person",
+    "@id": personId
+  }
+};
+
+const graph: any[] = [websiteSchema, personSchema];
+
+if (type === 'Article' && article) {
+  const articleUrl = `${SITE.url}/posts/${article.slug}/`;
+  graph.push({
+    "@type": "Article",
+    "@id": `${articleUrl}#article`,
+    "isPartOf": {
+      "@id": websiteId
+    },
+    "headline": article.title,
+    "description": article.description,
+    "datePublished": article.pubDate.toISOString(),
+    "author": {
+      "@type": "Person",
+      "@id": personId
+    },
+    "publisher": {
+      "@type": "Person",
+      "@id": personId
+    }
+  });
+}
+---
+<script type="application/ld+json" set:html={JSON.stringify({ "@context": "https://schema.org", "@graph": graph })} />

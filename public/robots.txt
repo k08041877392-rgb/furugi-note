@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://furugi-note.com/sitemap-index.xml
